@@ -1,28 +1,28 @@
 # pylint disable: invalid-name
 
 """
-home.py
+Tables
 """
 
 import streamlit as st
-import pandas as pd
 
 st.set_page_config(layout="wide")
 
-uploaded_file = st.session_state.get("uploaded_file", None)
+uploaded_file = st.session_state.get("current_file", None)
 
-if uploaded_file is not None:
-    all_sheets = pd.read_excel(uploaded_file, sheet_name=None)
-    dropdown_options = all_sheets
-    sheet_selector = st.selectbox("Select sheet", dropdown_options)
+if uploaded_file:
+    dropdown_options = uploaded_file.raw.keys()
+    sheet_selector = st.selectbox("Select sheet", list(dropdown_options))
 
-tab1, tab2, tab3 = st.tabs(["table_1","table_2","table_3"])
+    sheet_data = uploaded_file.sheets.get(sheet_selector)
 
-with tab1:
-    st.dataframe(pd.read_excel("../files/dummy_excel_1.xlsx"))
+    if sheet_data and sheet_data.tables:
+        tabs = st.tabs(sheet_data.tables.keys())
 
-with tab2:
-    st.dataframe(pd.read_excel("../files/dummy_excel_1.xlsx"))
-
-with tab3:
-    st.dataframe(pd.read_excel("../files/dummy_excel_1.xlsx"))
+        for tab, key in zip(tabs, sheet_data.tables.keys()):
+            with tab:
+                st.dataframe(sheet_data.tables[key])
+    else:
+        st.warning("No tables found in selected sheet.")
+else:
+    st.warning("Please upload an Excel file.")
