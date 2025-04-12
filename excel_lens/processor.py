@@ -1,3 +1,5 @@
+# pylint disable = protected-access
+
 """
 processor.py
 """
@@ -19,8 +21,8 @@ class ExcelSheet:
 
     charts: List[Any]
     images: List[Image.Image]
-    tables: List[Dict[str,pd.DataFrame]]
-    urls: List[dict]
+    tables: Dict[str, pd.DataFrame]
+    urls: Dict[str, str]
 
 
 @dataclass
@@ -58,6 +60,16 @@ class ExcelDataExtractor:
             ]
         ),
     ) -> ExcelFile:
+        """_summary_
+
+        Args:
+            excel_file (pd.DataFrame  |  dict[IntStrT, pd.DataFrame]  |
+            str  |  Tuple[ pd.DataFrame  |  dict[IntStrT, pd.DataFrame],
+            openpyxl.workbook.workbook.Workbook, ]): _description_
+
+        Returns:
+            ExcelFile: _description_
+        """
 
         if isinstance(excel_file, str):
             pandas_sheets = pd.read_excel(excel_file, sheet_name=None)
@@ -82,12 +94,24 @@ class ExcelDataExtractor:
         for sheet in sheet_names:
 
             row_tables = self.extract_tables_sep_by_rows(pandas_sheets[sheet])
-            row_tables = {table_name: self.remove_nan_cols(table) for table_name, table in row_tables.items()}
-            row_tables = {table_name: self.remove_nan_rows(table) for table_name, table in row_tables.items()}
+            row_tables = {
+                table_name: self.remove_nan_cols(table)
+                for table_name, table in row_tables.items()
+            }
+            row_tables = {
+                table_name: self.remove_nan_rows(table)
+                for table_name, table in row_tables.items()
+            }
 
             col_tables = self.extract_tables_sep_by_cols(pandas_sheets[sheet])
-            col_tables = {table_name: self.remove_nan_cols(table) for table_name, table in col_tables.items()}
-            col_tables = {table_name: self.remove_nan_rows(table) for table_name, table in col_tables.items()}
+            col_tables = {
+                table_name: self.remove_nan_cols(table)
+                for table_name, table in col_tables.items()
+            }
+            col_tables = {
+                table_name: self.remove_nan_rows(table)
+                for table_name, table in col_tables.items()
+            }
 
             if openpyxl_sheets:
                 charts = self.extract_charts(openpyxl_sheets[sheet])
@@ -98,14 +122,26 @@ class ExcelDataExtractor:
                 images = []
                 urls = []
 
-            curr_extracted_sheet = ExcelSheet(charts=charts, images=images, tables=row_tables, urls=urls)
-            extracted_sheets_dict[sheet]= curr_extracted_sheet
+            curr_extracted_sheet = ExcelSheet(
+                charts=charts, images=images, tables=row_tables, urls=urls
+            )
+            extracted_sheets_dict[sheet] = curr_extracted_sheet
 
-        extracted_excel_file = ExcelFile(raw=raw_excel_tables, sheets=extracted_sheets_dict)
+        extracted_excel_file = ExcelFile(
+            raw=raw_excel_tables, sheets=extracted_sheets_dict
+        )
 
         return extracted_excel_file
 
     def remove_nan_rows(self, table: pd.DataFrame) -> pd.DataFrame:
+        """_summary_
+
+        Args:
+            table (pd.DataFrame): _description_
+
+        Returns:
+            pd.DataFrame: _description_
+        """
         rows_to_drop = []
 
         for idx, row in table.iterrows():
@@ -117,12 +153,20 @@ class ExcelDataExtractor:
         return table
 
     def remove_nan_cols(self, table: pd.DataFrame) -> pd.DataFrame:
+        """_summary_
 
+        Args:
+            table (pd.DataFrame): _description_
+
+        Returns:
+            pd.DataFrame: _description_
+        """
         cols_to_drop = []
+
         for col in table.columns:
             if all(table[col].isnull()):
                 cols_to_drop.append(col)
-    
+
         table = table.drop(columns=cols_to_drop, axis=1).reset_index(drop=True)
 
         return table
@@ -130,6 +174,14 @@ class ExcelDataExtractor:
     def extract_tables_sep_by_rows(
         self, sheet_data: pd.DataFrame
     ) -> Dict[str, pd.DataFrame]:
+        """_summary_
+
+        Args:
+            sheet_data (pd.DataFrame): _description_
+
+        Returns:
+            Dict[str, pd.DataFrame]: _description_
+        """
 
         tables_dict = {}
         table_count = 1
@@ -169,6 +221,14 @@ class ExcelDataExtractor:
     def extract_tables_sep_by_cols(
         self, sheet_data: pd.DataFrame
     ) -> dict[str, pd.DataFrame]:
+        """_summary_
+
+        Args:
+            sheet_data (pd.DataFrame): _description_
+
+        Returns:
+            dict[str, pd.DataFrame]: _description_
+        """
 
         tables_dict = {}
         table_count = 1
@@ -204,17 +264,33 @@ class ExcelDataExtractor:
     def extract_urls(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
     ) -> List[str]:
+        """_summary_
 
-        urls_data = []
+        Args:
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+
+        Returns:
+            List[str]: _description_
+        """
+
+        urls_data = {}
         for row in sheet_data.iter_rows():
             for cell in row:
                 if cell.hyperlink:
-                    urls_data.append({cell.value: cell.hyperlink.target})
+                    urls_data[cell.value] = cell.hyperlink.target
         return urls_data
 
     def extract_images(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
     ) -> List[Image.Image]:
+        """_summary_
+
+        Args:
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+
+        Returns:
+            List[Image.Image]: _description_
+        """
 
         imgs_data = []
         for image in sheet_data._images:
@@ -225,6 +301,14 @@ class ExcelDataExtractor:
     def extract_charts(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
     ) -> List[Any]:
+        """_summary_
+
+        Args:
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+
+        Returns:
+            List[Any]: _description_
+        """
 
         charts_data = []
         for chart in sheet_data._charts:
