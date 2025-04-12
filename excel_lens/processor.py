@@ -30,7 +30,7 @@ class ExcelFile:
     """
 
     raw: Dict[str, pd.DataFrame]
-    sheets: List[ExcelSheet]
+    sheets: Dict[str, ExcelSheet]
 
 
 class ExcelDataExtractor:
@@ -59,23 +59,15 @@ class ExcelDataExtractor:
         ),
     ) -> ExcelFile:
 
-        extracted_excel_sheets = []
-
         if isinstance(excel_file, str):
             pandas_sheets = pd.read_excel(excel_file, sheet_name=None)
             openpyxl_sheets = openpyxl.load_workbook(excel_file)
             raw_excel_tables = pandas_sheets.copy()
-        elif isinstance(
-            excel_file,
-            Tuple[
-                pd.DataFrame | dict[IntStrT, pd.DataFrame],
-                openpyxl.workbook.workbook.Workbook,
-            ],
-        ):
+        elif isinstance(excel_file, tuple):
             pandas_sheets = excel_file[0]
             openpyxl_sheets = excel_file[1]
             raw_excel_tables = pandas_sheets.copy()
-        elif isinstance(excel_file, dict[IntStrT, pd.DataFrame]):
+        elif isinstance(excel_file, dict):
             pandas_sheets = excel_file
             openpyxl_sheets = None
             raw_excel_tables = pandas_sheets.copy()
@@ -86,7 +78,7 @@ class ExcelDataExtractor:
 
         sheet_names = raw_excel_tables.keys()
 
-        extracted_sheets_list = []
+        extracted_sheets_dict = {}
         for sheet in sheet_names:
 
             row_tables = self.extract_tables_sep_by_rows(pandas_sheets[sheet])
@@ -107,9 +99,9 @@ class ExcelDataExtractor:
                 urls = []
 
             curr_extracted_sheet = ExcelSheet(charts=charts, images=images, tables=row_tables, urls=urls)
-            extracted_sheets_list.append(curr_extracted_sheet)
+            extracted_sheets_dict[sheet]= curr_extracted_sheet
 
-        extracted_excel_file = ExcelFile(raw=raw_excel_tables, sheets=extracted_sheets_list)
+        extracted_excel_file = ExcelFile(raw=raw_excel_tables, sheets=extracted_sheets_dict)
 
         return extracted_excel_file
 
