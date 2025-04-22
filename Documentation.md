@@ -22,20 +22,23 @@ Prompts should first understand what kind of processing is expected and then gen
 5. Geometric and Trigonometric – sine, cosine, tangent etc.
 6. Code generation could be for mathematical processing or to obtain any graphs/charts.
 7. Check for the possibility of getting data from URLs and summarize them.
-   - The generated code will be executed using python builtin exec(). A safer option is RestrictedPython as it blocks unsafe commands from being executed.
-     
-     `code = "a = 5\nb = 10\nc = a + b"; exec(code)`
-   - Exploration of LangChain and agents - [create_pandas_dataframe_agent](https://python.langchain.com/api_reference/experimental/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html)
-   - Mathematical processing could be done using pandas, if simple linear regression is expected we may include scikit-learn as well.
-   - For charts/plots matplotlib/seaborn can be utilized.
-   - Utilize re to process prompt output.
-   - The generated code can cause errors - prompt again with generated code, error and let LLM rewrite the code.
-   - Expecting a LLM to write a large chunk of code would be more prone to errors, split the problem and prompt to write the chunks of code and get everything together. 
+<br>
+</br>
+
+- The generated code will be executed using python builtin exec(). A safer option is RestrictedPython as it blocks unsafe commands from being executed.
+  
+  `code = "a = 5\nb = 10\nc = a + b"; exec(code)`
+- Exploration of LangChain and agents - [create_pandas_dataframe_agent](https://python.langchain.com/api_reference/experimental/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html)
+- Mathematical processing could be done using pandas, if simple linear regression is expected we may include scikit-learn as well.
+- For charts/plots matplotlib/seaborn can be utilized.
+- Utilize re to process prompt output.
+- The generated code can cause errors - prompt again with generated code, error and let LLM rewrite the code.
+- Expecting a LLM to write a large chunk of code would be more prone to errors, split the problem and prompt to write the chunks of code and get everything together. 
 
 ## LLM pipeline: model.py, inference.py
 
-1. Text2Text: Multiple models tailored for specific prompts since one prompt might work well with one model but perform poorly with one model.
-2. Image2Text: Try out current lightweight Visual Q/A models.
+1. **Text2Text**: Multiple models tailored for specific prompts since one prompt might work well with one model but perform poorly with one model.
+2. **Image2Text**: Try out current lightweight Visual Q/A models.
    - Is there a need to perform OCR and pass it along with the image to the Visual Q/A model?
    - OCR would give context i.e. the title of the plot, what's present on X, Y axis and the values.
 - Try different quantizations bf16, f16, f32.
@@ -62,14 +65,18 @@ TBD - .whl/.toml/setup.py/dockerfile
 Demo colab notebook
 
 ## Coding
-Code formatter: black formatter and pylint.
-Docstrings: autoDocstring – Python Docstring Generator (Nils Werner) if using VSCode.
-Jupyter notebooks to be placed under the notebooks directory.
-    Naming – 
-    [num]-[name]-[exp_name].ipynb
-    E.g. 001-kj-cell-data-processing.ipynb
+- Code formatter: black formatter and pylint.
+- Docstrings: autoDocstring – Python Docstring Generator (Nils Werner) if using VSCode.
+- Jupyter notebooks to be placed under the notebooks directory.
+     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`%load_ext jupyter_black` to be run in 1st block of code  
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Naming –  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num]-[name]-[exp_name].ipynb  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E.g. 001-kj-cell-data-processing.ipynb
+
     
- from IPython.display import Markdown, display
+ `from IPython.display import Markdown, display`
 
 ## Data sources for testing
 https://github.com/bharathirajatut/sample-excel-dataset
