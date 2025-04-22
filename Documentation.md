@@ -31,7 +31,7 @@ Prompts should first understand what kind of processing is expected and then gen
 - Exploration of LangChain and agents - [create_pandas_dataframe_agent](https://python.langchain.com/api_reference/experimental/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html)
 - Mathematical processing could be done using pandas, if simple linear regression is expected we may include scikit-learn as well.
 - For charts/plots matplotlib/seaborn can be utilized.
-- Utilize re to process prompt output.
+- Utilize `re` RegEx module to process prompt output.
 - The generated code can cause errors - prompt again with generated code, error and let LLM rewrite the code.
 - Expecting a LLM to write a large chunk of code would be more prone to errors, split the problem and prompt to write the chunks of code and get everything together. 
 
@@ -54,9 +54,8 @@ TBD after experimentation.
    1. Tables
    2. Images
    3. Charts
-   4. URLs
-   
-Prompt chat window – To type questions/prompts and get responses. A dropdown within the prompt window to select the table/chart/image to use. 
+   4. URLs 
+3. Prompt chat window – To type questions/prompts and get responses. A dropdown within the prompt window to select the table/chart/image to use. 
 
 
 ## Package
