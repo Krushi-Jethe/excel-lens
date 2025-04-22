@@ -11,7 +11,7 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from excel_lens.processor import ExcelDataExtractor
+from excel_lens import ExcelDataExtractor
 
 st.set_page_config(layout="wide")
 st.header("Welcome to Excel-Lens!")
