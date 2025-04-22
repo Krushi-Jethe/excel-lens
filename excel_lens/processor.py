@@ -52,23 +52,47 @@ class ExcelDataExtractor:
         self,
         excel_file: (
             pd.DataFrame
-            | dict[IntStrT, pd.DataFrame]
             | str
+            | Dict[IntStrT, pd.DataFrame]
             | Tuple[
-                pd.DataFrame | dict[IntStrT, pd.DataFrame],
+                pd.DataFrame | Dict[IntStrT, pd.DataFrame],
                 openpyxl.workbook.workbook.Workbook,
             ]
         ),
     ) -> ExcelFile:
-        """_summary_
+        """
+        Processes the data present in an excel file based on the input provided.
+
+        Accepts inputs:
+         - A pandas dataframe (to extract only tables data from single sheet)
+         - Path to the excel file
+         - Dictionary containing sheet name as keys and data present in that sheet as pandas
+           dataframe for value. Output obtained from pd.read_excel(<YOUR_PATH_HERE>,sheet_name=None)
+           Extracts only table data.
+         - Tuple containing dictionary having sheet name and data as key value pairs and openpyxl
+           workbook. File read using pandas should be the 1st element of the tuple and the one
+           read by openpyxl should be second.
+
+        Calls various methods to process data:
+         - extract_tables_sep_by_rows
+         - extract_tables_sep_by_cols
+         - remove_nan_rows
+         - remove_nan_cols
+         - extract_urls
+         - extract_images
+         - extract_charts
 
         Args:
-            excel_file (pd.DataFrame  |  dict[IntStrT, pd.DataFrame]  |
-            str  |  Tuple[ pd.DataFrame  |  dict[IntStrT, pd.DataFrame],
-            openpyxl.workbook.workbook.Workbook, ]): _description_
+            excel_file (pd.DataFrame  |
+                        str  |
+                        Dict[IntStrT, pd.DataFrame]  |
+                        Tuple[pd.DataFrame  |
+                        Dict[IntStrT, pd.DataFrame],
+                        openpyxl.workbook.workbook.Workbook]): Excel file to extract data from.
 
         Returns:
-            ExcelFile: _description_
+            ExcelFile: Processed data after extracting all tables, urls, images and
+                       charts in ExcelFile dataclass.
         """
 
         if isinstance(excel_file, str):
@@ -79,7 +103,7 @@ class ExcelDataExtractor:
             pandas_sheets = excel_file[0]
             openpyxl_sheets = excel_file[1]
             raw_excel_tables = pandas_sheets.copy()
-        elif isinstance(excel_file, dict):
+        elif isinstance(excel_file, Dict):
             pandas_sheets = excel_file
             openpyxl_sheets = None
             raw_excel_tables = pandas_sheets.copy()
@@ -118,9 +142,7 @@ class ExcelDataExtractor:
                 images = self.extract_images(openpyxl_sheets[sheet])
                 urls = self.extract_urls(openpyxl_sheets[sheet])
             else:
-                charts = []
-                images = []
-                urls = []
+                charts, images, urls = [], [], []
 
             curr_extracted_sheet = ExcelSheet(
                 charts=charts, images=images, tables=row_tables, urls=urls
@@ -134,14 +156,18 @@ class ExcelDataExtractor:
         return extracted_excel_file
 
     def remove_nan_rows(self, table: pd.DataFrame) -> pd.DataFrame:
-        """_summary_
+        """
+        Scans the entire dataframe and gets rid of rows containing
+        no entries/NaNs.
 
         Args:
-            table (pd.DataFrame): _description_
+            table (pd.DataFrame): Pandas dataframe from which we wish to
+                                  remove rows containing all values as NaN.
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: Dataframe after removing NaN rows.
         """
+
         rows_to_drop = []
 
         for idx, row in table.iterrows():
@@ -153,14 +179,18 @@ class ExcelDataExtractor:
         return table
 
     def remove_nan_cols(self, table: pd.DataFrame) -> pd.DataFrame:
-        """_summary_
+        """
+        Scans the entire dataframe and gets rid of columns containing
+        no entries/NaNs.
 
         Args:
-            table (pd.DataFrame): _description_
+            table (pd.DataFrame): Pandas dataframe from which we wish to
+                                  remove columns containing all values as NaN.
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: Dataframe after removing NaN columns.
         """
+
         cols_to_drop = []
 
         for col in table.columns:
@@ -174,13 +204,16 @@ class ExcelDataExtractor:
     def extract_tables_sep_by_rows(
         self, sheet_data: pd.DataFrame
     ) -> Dict[str, pd.DataFrame]:
-        """_summary_
+        """
+
 
         Args:
-            sheet_data (pd.DataFrame): _description_
+            sheet_data (pd.DataFrame): An excel sheet as a pandas dataframe.
 
         Returns:
-            Dict[str, pd.DataFrame]: _description_
+            Dict[str, pd.DataFrame]: Dictionary containing dynamically assigned
+                                     table names as keys and values as the table data
+                                     which is a pandas dataframe
         """
 
         tables_dict = {}
@@ -212,22 +245,25 @@ class ExcelDataExtractor:
                     table_count += 1
 
             if idx == len(sheet_data) - 1:
-                tables_dict[f"table_{table_count+1}"] = sheet_data.iloc[
-                    curr_table_idx:, :
-                ]
+                tables_dict[
+                    f"table_{table_count+1}" if tables_dict else f"table_{table_count}"
+                ] = sheet_data.iloc[curr_table_idx:, :]
 
         return tables_dict
 
     def extract_tables_sep_by_cols(
         self, sheet_data: pd.DataFrame
-    ) -> dict[str, pd.DataFrame]:
-        """_summary_
+    ) -> Dict[str, pd.DataFrame]:
+        """
+
 
         Args:
-            sheet_data (pd.DataFrame): _description_
+            sheet_data (pd.DataFrame): An excel sheet as a pandas dataframe.
 
         Returns:
-            dict[str, pd.DataFrame]: _description_
+            Dict[str, pd.DataFrame]: Dictionary containing dynamically assigned
+                                     table names as key and values as the table data
+                                     which is a pandas dataframe
         """
 
         tables_dict = {}
@@ -256,21 +292,25 @@ class ExcelDataExtractor:
                     table_count += 1
 
             if col == sheet_data.columns[-1]:
-                tables_dict[f"table_{table_count+1}"] = sheet_data[
-                    sheet_data.columns[curr_table_idx:]
-                ]
+                tables_dict[
+                    f"table_{table_count+1}" if tables_dict else f"table_{table_count}"
+                ] = sheet_data[sheet_data.columns[curr_table_idx:]]
         return tables_dict
 
     def extract_urls(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
-    ) -> List[str]:
-        """_summary_
+    ) -> Dict[str, str]:
+        """
+        Given an openpyxl worksheet the function returns all urls
+        present in the sheet as key, value pairs where the value is
+        the actual link and the key is the display name.
 
         Args:
-            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): sheet from which urls
+                                                                 needs to extracted.
 
         Returns:
-            List[str]: _description_
+            Dict[str, str]:
         """
 
         urls_data = {}
@@ -283,13 +323,16 @@ class ExcelDataExtractor:
     def extract_images(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
     ) -> List[Image.Image]:
-        """_summary_
+        """
+        Given an openpyxl worksheet the function returns all images
+        present in the sheet.
 
         Args:
-            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): sheet from which images
+                                                                 needs to extracted.
 
         Returns:
-            List[Image.Image]: _description_
+            List[Image.Image]: List containing PIL images.
         """
 
         imgs_data = []
@@ -301,16 +344,40 @@ class ExcelDataExtractor:
     def extract_charts(
         self, sheet_data: openpyxl.worksheet.worksheet.Worksheet
     ) -> List[Any]:
-        """_summary_
+        """
+        Given an openpyxl worksheet the function returns all charts
+        present in the sheet
 
         Args:
-            sheet_data (openpyxl.worksheet.worksheet.Worksheet): _description_
+            sheet_data (openpyxl.worksheet.worksheet.Worksheet): sheet from which charts
+                                                                 needs to extracted.
 
         Returns:
-            List[Any]: _description_
+            List[Any]: List containing charts data.
         """
 
         charts_data = []
         for chart in sheet_data._charts:
             charts_data.append(chart)
         return charts_data
+
+    def generate_charts(self, charts_data: List[Any]) -> List[Image.Image]:
+        """
+        Uses charts data obtained from openpyxl and creates the charts using
+        matplotlib which is then stored in a list after converting the matplotlib
+        image to PIL image format.
+
+        Args:
+            charts_list (List[Any]): Charts data extracted from openpyxl.
+
+        Returns:
+            List[Image.Image]: List containing images of charts present.
+        """
+
+        charts_list = []
+
+        for chart in charts_list:
+            # code here
+            charts_list.append("placeholder")
+
+        return charts_list
