@@ -2,14 +2,15 @@
 
 ## Data Processors: processors.py
 
-1. Cell data processors (Pandas/openpyxl)
-    - Multiple sheets present within the file.
-    - Multiple tables present in a single sheet.
-    - Final data should include all tables present in the excel file. Dynamic assignment of variables might be needed.
-    - Image and chart processors (openpyxl)
-    - The data i.e.  pictures, charts, links will be loaded using openpyxl.
-    - Tables can be processed using pandas.
-    - Use @dataclass decorator to create a data class which will holds tables, images, charts, urls or any other components from the excel file.
+Cell data processors (Pandas/openpyxl)
+
+- Multiple sheets present within the file.
+- Multiple tables present in a single sheet.
+- Final data should include all tables present in the excel file. Dynamic assignment of variables might be needed.
+- Image and chart processors (openpyxl)
+- The data i.e.  pictures, charts, links will be loaded using openpyxl.
+- Tables can be processed using pandas.
+- Use @dataclass decorator to create a data class which will holds tables, images, charts, urls or any other components from the excel file.
 
 ## Prompts config: prompts.py
 
@@ -24,8 +25,10 @@ Prompts should first understand what kind of processing is expected and then gen
    - The generated code will be executed using python builtin exec(). A safer option is RestrictedPython as it blocks unsafe commands from being executed.
      
      `code = "a = 5\nb = 10\nc = a + b"; exec(code)`
+   - Exploration of LangChain and agents - [create_pandas_dataframe_agent](https://python.langchain.com/api_reference/experimental/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html)
    - Mathematical processing could be done using pandas, if simple linear regression is expected we may include scikit-learn as well.
    - For charts/plots matplotlib/seaborn can be utilized.
+   - Utilize re to process prompt output.
    - The generated code can cause errors - prompt again with generated code, error and let LLM rewrite the code.
    - Expecting a LLM to write a large chunk of code would be more prone to errors, split the problem and prompt to write the chunks of code and get everything together. 
 
@@ -49,11 +52,13 @@ TBD after experimentation.
    2. Images
    3. Charts
    4. URLs
+   
 Prompt chat window – To type questions/prompts and get responses. A dropdown within the prompt window to select the table/chart/image to use. 
 
 
 ## Package
 TBD - .whl/.toml/setup.py/dockerfile
+
 Demo colab notebook
 
 ## Coding
@@ -68,9 +73,13 @@ Jupyter notebooks to be placed under the notebooks directory.
 
 ## Data sources for testing
 https://github.com/bharathirajatut/sample-excel-dataset
+
 https://github.com/microsoft/powerbi-desktop-samples/tree/main/powerbi-service-samples
+
 https://catalog.data.gov/dataset/18-excel-spreadsheets-by-species-and-year-giving-reproduction-and-growth-data-one-excel-sp
+
 https://www.thespreadsheetguru.com/sample-data/
+
 https://marcus-small.squarespace.com/ebit-dashboard
 
 
