@@ -25,7 +25,13 @@ class ExcelSheet:
     urls: Dict[str, str]
 
     @property
-    def ntables(self):
+    def ntables(self) -> int:
+        """
+        Returns the number of tables present in a sheet.
+
+        Returns:
+            int: Number of tables.
+        """
         return len(self.tables)
 
 
@@ -39,18 +45,41 @@ class ExcelFile:
     sheets: Dict[str, ExcelSheet]
 
     @property
-    def nsheets(self):
+    def nsheets(self) -> int:
+        """
+        Returns the number of sheets present in the file.
+
+        Returns:
+            int: Number of sheets
+        """
         return len(self.sheets)
-    
+
     @property
-    def sheet_names(self):
+    def sheet_names(self) -> List[str]:
+        """
+        Returns a list of sheet names present in the Excel File.
+
+        Returns:
+            List[str]: List of sheet names
+        """
         return list(self.sheets.keys())
-    
+
     def get_sheet(self, sheet_name: str) -> ExcelSheet:
+        """
+        Fetches sheet data
+
+        Args:
+            sheet_name (str): Name of the sheet
+
+        Returns:
+            ExcelSheet: Data present in the sheet
+        """
         if sheet_name not in self.sheets:
-            return ValueError(f"Sheet: {sheet_name} not found. Available sheets {self.sheet_names}")
+            return ValueError(
+                f"Sheet: {sheet_name} not found. Available sheets {self.sheet_names}"
+            )
         return self.sheets[sheet_name]
-    
+
     def __getitem__(self, sheet_name: str) -> ExcelSheet:
         return self.get_sheet(sheet_name)
 
