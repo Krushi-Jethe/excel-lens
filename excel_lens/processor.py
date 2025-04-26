@@ -24,6 +24,10 @@ class ExcelSheet:
     tables: Dict[str, pd.DataFrame]
     urls: Dict[str, str]
 
+    @property
+    def ntables(self):
+        return len(self.tables)
+
 
 @dataclass
 class ExcelFile:
@@ -33,6 +37,22 @@ class ExcelFile:
 
     raw: Dict[str, pd.DataFrame]
     sheets: Dict[str, ExcelSheet]
+
+    @property
+    def nsheets(self):
+        return len(self.sheets)
+    
+    @property
+    def sheet_names(self):
+        return list(self.sheets.keys())
+    
+    def get_sheet(self, sheet_name: str) -> ExcelSheet:
+        if sheet_name not in self.sheets:
+            return ValueError(f"Sheet: {sheet_name} not found. Available sheets {self.sheet_names}")
+        return self.sheets[sheet_name]
+    
+    def __getitem__(self, sheet_name: str) -> ExcelSheet:
+        return self.get_sheet(sheet_name)
 
 
 class ExcelDataExtractor:
@@ -376,7 +396,7 @@ class ExcelDataExtractor:
 
         charts_list = []
 
-        for chart in charts_list:
+        for chart in charts_data:
             # code here
             charts_list.append("placeholder")
 
