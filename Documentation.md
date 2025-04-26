@@ -77,6 +77,8 @@ Demo colab notebook
     
  `from IPython.display import Markdown, display`
 
+ **For development a seperate conda env should be created, python = 3.12.9 and requirements.txt**
+
 ## Data sources for testing
 https://github.com/bharathirajatut/sample-excel-dataset
 
